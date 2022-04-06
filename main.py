@@ -1,4 +1,15 @@
-from typing import Dict
+from typing import Dict, Union
+
+
+def format_game_point(points: int) -> Union[int, None]:
+    formatted_points = {
+        0: 0,
+        1: 15,
+        2: 30,
+        3: 40
+    }
+
+    return formatted_points.get(points, None)
 
 
 class Match:
@@ -21,7 +32,7 @@ class Match:
 
         self.game_scores[player] += 1
 
-        if self.game_scores[player] >= 4 and self.game_scores[player] + 2 >= self.game_scores[other_player]:
+        if self.game_scores[player] >= 4 and self.game_scores[player] >= self.game_scores[other_player] + 2:
 
             # reset game score
             self.game_scores[self.player_one] = 0
@@ -34,8 +45,6 @@ class Match:
         player_one_game_score = self.game_scores[self.player_one]
         player_two_game_score = self.game_scores[self.player_two]
 
-        current_game_score_text = ""
-
         if player_one_game_score == 0 and player_two_game_score == 0:
             current_game_score_text = ""
         elif player_one_game_score >= 3 or player_two_game_score >= 3:
@@ -45,11 +54,14 @@ class Match:
                 # the player that's in the lead for this game only - not sets!
                 game_winning_player = self.player_one if player_one_game_score > player_two_game_score else self.player_two
                 current_game_score_text = f", Advantage {game_winning_player}"
+            else:
+                current_game_score_text = f", {format_game_point(player_one_game_score)}-{format_game_point(player_two_game_score)}"
         else:
-            current_game_score_text = f", {player_one_game_score * 15}-{player_two_game_score * 15}"
+            current_game_score_text = f", {format_game_point(player_one_game_score)}-{format_game_point(player_two_game_score)}"
 
         return f"{self.set_scores[self.player_one]}-{self.set_scores[self.player_two]}{current_game_score_text}"
 
+# #TODO: add sets winning critea - I've mised it
 
 if __name__ == '__main__':
     match = Match("player 1", "player 2")
