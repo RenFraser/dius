@@ -27,12 +27,24 @@ class Match:
             player_two: 0,
         }
 
-    def point_won_by(self, player: str) -> None:
-        other_player = self.player_one if player == self.player_two else self.player_two
+    def _are_game_points_equal(self) -> bool:
+        return self.game_scores[self.player_one] == self.game_scores[self.player_two]
+
+    def _is_deuce(self) -> bool:
+        return (self.game_scores[self.player_one] >= 3 or self.game_scores[self.player_two] >= 3) and self._are_game_points_equal()
+
+    def _get_game_score_difference(self) -> int:
+        return abs(self.game_scores[self.player_one] - self.game_scores[self.player_two])
+
+    def _get_set_score(self) -> str:
+        return f"{self.set_scores[self.player_one]}-{self.set_scores[self.player_two]}"
+
+    def point_won_by(self, player: str):
+        opponent = self.player_one if player == self.player_two else self.player_two
 
         self.game_scores[player] += 1
 
-        if self.game_scores[player] >= 4 and self.game_scores[player] >= self.game_scores[other_player] + 2:
+        if self.game_scores[player] >= 4 and self.game_scores[player] >= self.game_scores[opponent] + 2:
 
             # reset game score
             self.game_scores[self.player_one] = 0
@@ -41,25 +53,26 @@ class Match:
             # increase winning player's set score
             self.set_scores[player] += 1
 
+    # *leading* and not winning to avoid confusion about whether a player has won
+    # returns None if both players have an equal score
+    def _get_game_leading_player(self) -> Union[str, None]:
+        if self._are_game_points_equal():
+            return None
+
+        return self.player_one if self.game_scores[self.player_one] > self.game_scores[self.player_two] else self.player_two
+
     def score(self) -> str:
-        player_one_game_score = self.game_scores[self.player_one]
-        player_two_game_score = self.game_scores[self.player_two]
+        if self.game_scores[self.player_one] == 0 and self._are_game_points_equal():
+            return self._get_set_score()
 
-        if player_one_game_score == 0 and player_two_game_score == 0:
-            current_game_score_text = ""
-        elif player_one_game_score >= 3 or player_two_game_score >= 3:
-            if player_one_game_score == player_two_game_score:
-                current_game_score_text = ", Deuce"
-            elif abs(player_one_game_score - player_two_game_score) == 1:
-                # the player that's in the lead for this game only - not sets!
-                game_winning_player = self.player_one if player_one_game_score > player_two_game_score else self.player_two
-                current_game_score_text = f", Advantage {game_winning_player}"
-            else:
-                current_game_score_text = f", {format_game_point(player_one_game_score)}-{format_game_point(player_two_game_score)}"
-        else:
-            current_game_score_text = f", {format_game_point(player_one_game_score)}-{format_game_point(player_two_game_score)}"
+        if self._is_deuce():
+            return f"{self._get_set_score()}, Deuce"
 
-        return f"{self.set_scores[self.player_one]}-{self.set_scores[self.player_two]}{current_game_score_text}"
+        if (self.game_scores[self.player_one] >= 3 or self.game_scores[self.player_two] >= 3) and self._get_game_score_difference() == 1:
+            return f"{self._get_set_score()}, Advantage {self._get_game_leading_player()}"
+
+        return f"{self._get_set_score()}, {format_game_point(self.game_scores[self.player_one])}-{format_game_point(self.game_scores[self.player_two])}"
+
 
 # #TODO: add sets winning critea - I've mised it
 
