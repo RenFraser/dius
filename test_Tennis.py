@@ -56,3 +56,27 @@ def test_SetWinPlayerOne():
     match.point_won_by("player 1")
 
     assert match.score() == "1-0"
+
+
+def test_matchWinPlayerOne():
+    match = Match("player 1", "player 2")
+
+    num_games_to_win_set = 4
+    num_sets_to_win_match = 6
+
+    for i in range(num_sets_to_win_match * num_games_to_win_set):
+        match.point_won_by("player 1")
+
+    assert match.score() == "6-0"
+
+
+def test_matchCannotContinueAfterWin():
+    match = Match("player 1", "player 2")
+
+    num_games_to_win_set = 4
+    num_sets_to_win_match = 6
+
+    for i in range((num_sets_to_win_match * num_games_to_win_set) + 1):
+        match.point_won_by("player 1")
+
+    assert match.score() == "6-0"
